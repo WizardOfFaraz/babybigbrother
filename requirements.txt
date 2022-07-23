@@ -1,0 +1,8 @@
+absl-py
+cmake # On Debian-based systems - sudo apt install cmake
+dlib
+face_recognition
+opencv-python
+pychromecast
+tabulate
+
