@@ -52,6 +52,8 @@ def main(argv):
     face_names = []
 
     start_time = 0
+    set_pause = False
+    found_face = False
 
     # Main loop
     while(True):
@@ -63,24 +65,27 @@ def main(argv):
       
         face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
         face_names = []
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.6)
             name = "Unknown"
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
+
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
                 start_time = time.time()
+                found_face = True
                 if mc.status.player_state != 'PAUSED':
+                    set_pause = True
                     mc.pause()          
-            elif mc.status.player_state == 'PAUSED':
-                if time.time() - start_time > FLAGS.cooldown_seconds:
-                    mc.play()
-                    start_time = 0
             face_names.append(name)
-
+        if set_pause:
+            if time.time() - start_time > FLAGS.cooldown_seconds:
+                mc.play()
+                set_pause = False
+                start_time = 0
+         
         for (top, right, bottom, left), name in zip(face_locations, face_names):
             top *= 4
             right *= 4
